@@ -1,25 +1,31 @@
-fx_version 'bodacious'
+fx_version 'cerulean'
 game 'gta5'
 
-description 'QB-Phone'
-version '1.3.0'
+author 'qb-phone Edit'
+description 'A NoPixel inspired edit of QBCore\'s Phone.'
+version '1.0.0'
+
+dependencies {
+    'ox_lib',
+}
 
 ui_page 'html/index.html'
 
 shared_scripts {
     'config.lua',
+    'shared/shared.lua',
     '@qb-apartments/config.lua',
     '@qb-garages/config.lua',
+    '@ox_lib/init.lua'
 }
 
 client_scripts {
-    'client/main.lua',
-    'client/animation.lua'
+    'client/*.lua',
 }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
-    'server/main.lua'
+    'server/*.lua',
 }
 
 files {
@@ -32,3 +38,11 @@ files {
 }
 
 lua54 'yes'
+
+dependency 'qb-target'
+
+escrow_ignore {
+    'config.lua',
+    'client/jobcenter.lua',
+    'server/employment.lua',
+}

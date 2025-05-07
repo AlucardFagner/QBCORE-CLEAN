@@ -4,7 +4,7 @@ QBCore.Entity_Buckets = {}
 QBCore.UsableItems = {}
 
 -- Getters
--- Get seu jogador primeiro e depois desencadeia uma função
+-- Get your player first and then trigger a function on them
 -- ex: local player = QBCore.Functions.GetPlayer(source)
 -- ex: local example = player.Functions.functionname(parameter)
 
@@ -22,13 +22,8 @@ end
 ---@param idtype string
 ---@return string?
 function QBCore.Functions.GetIdentifier(source, idtype)
-    local identifiers = GetPlayerIdentifiers(source)
-    for _, identifier in pairs(identifiers) do
-        if string.find(identifier, idtype) then
-            return identifier
-        end
-    end
-    return nil
+    if GetConvarInt('sv_fxdkMode', 0) == 1 then return 'license:fxdk' end
+    return GetPlayerIdentifierByType(source, idtype or 'license')
 end
 
 ---Gets a players server id (source). Returns 0 if no player is found.
@@ -50,8 +45,8 @@ end
 ---@param source any
 ---@return table
 function QBCore.Functions.GetPlayer(source)
-    if type(source) == 'number' then
-        return QBCore.Players[source]
+    if tonumber(source) ~= nil then -- If a number is a string ("1"), this will still correctly identify the index to use.
+        return QBCore.Players[tonumber(source)]
     else
         return QBCore.Players[QBCore.Functions.GetSource(source)]
     end
@@ -76,6 +71,13 @@ function QBCore.Functions.GetOfflinePlayerByCitizenId(citizenid)
     return QBCore.Player.GetOfflinePlayer(citizenid)
 end
 
+---Get player by license
+---@param license string
+---@return table?
+function QBCore.Functions.GetPlayerByLicense(license)
+    return QBCore.Player.GetPlayerByLicense(license)
+end
+
 ---Get player by phone number
 ---@param number number
 ---@return table?
@@ -88,12 +90,38 @@ function QBCore.Functions.GetPlayerByPhone(number)
     return nil
 end
 
+---Get player by account id
+---@param account string
+---@return table?
+function QBCore.Functions.GetPlayerByAccount(account)
+    for src in pairs(QBCore.Players) do
+        if QBCore.Players[src].PlayerData.charinfo.account == account then
+            return QBCore.Players[src]
+        end
+    end
+    return nil
+end
+
+---Get player passing property and value to check exists
+---@param property string
+---@param value string
+---@return table?
+function QBCore.Functions.GetPlayerByCharInfo(property, value)
+    for src in pairs(QBCore.Players) do
+        local charinfo = QBCore.Players[src].PlayerData.charinfo
+        if charinfo[property] ~= nil and charinfo[property] == value then
+            return QBCore.Players[src]
+        end
+    end
+    return nil
+end
+
 ---Get all players. Returns the server ids of all players.
 ---@return table
 function QBCore.Functions.GetPlayers()
     local sources = {}
     for k in pairs(QBCore.Players) do
-        sources[#sources+1] = k
+        sources[#sources + 1] = k
     end
     return sources
 end
@@ -123,7 +151,7 @@ function QBCore.Functions.GetPlayersOnDuty(job)
 end
 
 ---Returns only the amount of players on duty for the specified job
----@param job any
+---@param job string
 ---@return number
 function QBCore.Functions.GetDutyCount(job)
     local count = 0
@@ -135,6 +163,96 @@ function QBCore.Functions.GetDutyCount(job)
         end
     end
     return count
+end
+
+--- @param source number source player's server ID.
+--- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
+--- @return string closestPlayer - The Player that is closest to the source player (or the provided coordinates). Returns -1 if no Players are found.
+--- @return number closestDistance - The distance to the closest Player. Returns -1 if no Players are found.
+function QBCore.Functions.GetClosestPlayer(source, coords)
+    local ped = GetPlayerPed(source)
+    local players = GetPlayers()
+    local closestDistance, closestPlayer = -1, -1
+    if coords then coords = type(coords) == 'table' and vector3(coords.x, coords.y, coords.z) or coords end
+    if not coords then coords = GetEntityCoords(ped) end
+    for i = 1, #players do
+        local playerId = players[i]
+        local playerPed = GetPlayerPed(playerId)
+        if playerPed ~= ped then
+            local playerCoords = GetEntityCoords(playerPed)
+            local distance = #(playerCoords - coords)
+            if closestDistance == -1 or distance < closestDistance then
+                closestPlayer = playerId
+                closestDistance = distance
+            end
+        end
+    end
+    return closestPlayer, closestDistance
+end
+
+--- @param source number source player's server ID.
+--- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
+--- @return number closestObject - The Object that is closest to the source player (or the provided coordinates). Returns -1 if no Objects are found.
+--- @return number closestDistance - The distance to the closest Object. Returns -1 if no Objects are found.
+function QBCore.Functions.GetClosestObject(source, coords)
+    local ped = GetPlayerPed(source)
+    local objects = GetAllObjects()
+    local closestDistance, closestObject = -1, -1
+    if coords then coords = type(coords) == 'table' and vector3(coords.x, coords.y, coords.z) or coords end
+    if not coords then coords = GetEntityCoords(ped) end
+    for i = 1, #objects do
+        local objectCoords = GetEntityCoords(objects[i])
+        local distance = #(objectCoords - coords)
+        if closestDistance == -1 or closestDistance > distance then
+            closestObject = objects[i]
+            closestDistance = distance
+        end
+    end
+    return closestObject, closestDistance
+end
+
+--- @param source number source player's server ID.
+--- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
+--- @return number closestVehicle - The Vehicle that is closest to the source player (or the provided coordinates). Returns -1 if no Vehicles are found.
+--- @return number closestDistance - The distance to the closest Vehicle. Returns -1 if no Vehicles are found.
+function QBCore.Functions.GetClosestVehicle(source, coords)
+    local ped = GetPlayerPed(source)
+    local vehicles = GetAllVehicles()
+    local closestDistance, closestVehicle = -1, -1
+    if coords then coords = type(coords) == 'table' and vector3(coords.x, coords.y, coords.z) or coords end
+    if not coords then coords = GetEntityCoords(ped) end
+    for i = 1, #vehicles do
+        local vehicleCoords = GetEntityCoords(vehicles[i])
+        local distance = #(vehicleCoords - coords)
+        if closestDistance == -1 or closestDistance > distance then
+            closestVehicle = vehicles[i]
+            closestDistance = distance
+        end
+    end
+    return closestVehicle, closestDistance
+end
+
+--- @param source number source player's server ID.
+--- @param coords vector The coordinates to calculate the distance from. Can be a table with x, y, z fields or a vector3. If not provided, the source player's Ped's coordinates are used.
+--- @return number closestPed - The Ped that is closest to the source player (or the provided coordinates). Returns -1 if no Peds are found.
+--- @return number closestDistance - The distance to the closest Ped. Returns -1 if no Peds are found.
+function QBCore.Functions.GetClosestPed(source, coords)
+    local ped = GetPlayerPed(source)
+    local peds = GetAllPeds()
+    local closestDistance, closestPed = -1, -1
+    if coords then coords = type(coords) == 'table' and vector3(coords.x, coords.y, coords.z) or coords end
+    if not coords then coords = GetEntityCoords(ped) end
+    for i = 1, #peds do
+        if peds[i] ~= ped then
+            local pedCoords = GetEntityCoords(peds[i])
+            local distance = #(pedCoords - coords)
+            if closestDistance == -1 or closestDistance > distance then
+                closestPed = peds[i]
+                closestDistance = distance
+            end
+        end
+    end
+    return closestPed, closestDistance
 end
 
 -- Routing buckets (Only touch if you know what you are doing)
@@ -152,8 +270,9 @@ end
 function QBCore.Functions.SetPlayerBucket(source, bucket)
     if source and bucket then
         local plicense = QBCore.Functions.GetIdentifier(source, 'license')
+        Player(source).state:set('instance', bucket, true)
         SetPlayerRoutingBucket(source, bucket)
-        QBCore.Player_Buckets[plicense] = {id = source, bucket = bucket}
+        QBCore.Player_Buckets[plicense] = { id = source, bucket = bucket }
         return true
     else
         return false
@@ -167,7 +286,7 @@ end
 function QBCore.Functions.SetEntityBucket(entity, bucket)
     if entity and bucket then
         SetEntityRoutingBucket(entity, bucket)
-        QBCore.Entity_Buckets[entity] = {id = entity, bucket = bucket}
+        QBCore.Entity_Buckets[entity] = { id = entity, bucket = bucket }
         return true
     else
         return false
@@ -275,33 +394,33 @@ function QBCore.Functions.CreateVehicle(source, model, vehtype, coords, warp)
     return veh
 end
 
----Paychecks (standalone - don't touch)
 function PaycheckInterval()
-    if next(QBCore.Players) then
-        for _, Player in pairs(QBCore.Players) do
-            if Player then
-                local payment = QBShared.Jobs[Player.PlayerData.job.name]['grades'][tostring(Player.PlayerData.job.grade.level)].payment
-                if not payment then payment = Player.PlayerData.job.payment end
-                if Player.PlayerData.job and payment > 0 and (QBShared.Jobs[Player.PlayerData.job.name].offDutyPay or Player.PlayerData.job.onduty) then
-                    if QBCore.Config.Money.PayCheckSociety then
-                        local account = exports['qb-management']:GetAccount(Player.PlayerData.job.name)
-                        if account ~= 0 then -- Checks if player is employed by a society
-                            if account < payment then -- Checks if company has enough money to pay society
-                                TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('error.company_too_poor'), 'error')
-                            else
-                                Player.Functions.AddMoney('bank', payment, 'paycheck')
-                                exports['qb-management']:RemoveMoney(Player.PlayerData.job.name, payment)
-                                TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('info.received_paycheck', {value = payment}))
-                            end
-                        else
-                            Player.Functions.AddMoney('bank', payment, 'paycheck')
-                            TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('info.received_paycheck', {value = payment}))
-                        end
+    if not next(QBCore.Players) then 
+        SetTimeout(QBCore.Config.Money.PayCheckTimeOut * (60 * 1000), PaycheckInterval) -- Prevent paychecks from stopping forever once 0 players
+        return 
+    end
+    for _, Player in pairs(QBCore.Players) do
+        if not Player then return end
+        local payment = QBShared.Jobs[Player.PlayerData.job.name]['grades'][tostring(Player.PlayerData.job.grade.level)].payment
+        if not payment then payment = Player.PlayerData.job.payment end
+        if Player.PlayerData.job and payment > 0 and (QBShared.Jobs[Player.PlayerData.job.name].offDutyPay or Player.PlayerData.job.onduty) then
+            if QBCore.Config.Money.PayCheckSociety then
+                local account = exports['qb-banking']:GetAccountBalance(Player.PlayerData.job.name)
+                if account ~= 0 then
+                    if account < payment then
+                        TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('error.company_too_poor'), 'error')
                     else
                         Player.Functions.AddMoney('bank', payment, 'paycheck')
-                        TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('info.received_paycheck', {value = payment}))
+                        exports['qb-banking']:RemoveMoney(Player.PlayerData.job.name, payment, 'Employee Paycheck')
+                        TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('info.received_paycheck', { value = payment }))
                     end
+                else
+                    Player.Functions.AddMoney('bank', payment, 'paycheck')
+                    TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('info.received_paycheck', { value = payment }))
                 end
+            else
+                Player.Functions.AddMoney('bank', payment, 'paycheck')
+                TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Lang:t('info.received_paycheck', { value = payment }))
             end
         end
     end
@@ -315,9 +434,26 @@ end
 ---@param source any
 ---@param cb function
 ---@param ... any
-function QBCore.Functions.TriggerClientCallback(name, source, cb, ...)
-    QBCore.ClientCallbacks[name] = cb
-    TriggerClientEvent('QBCore:Client:TriggerClientCallback', source, name, ...)
+function QBCore.Functions.TriggerClientCallback(name, source, ...)
+    local cb = nil
+    local args = { ... }
+
+    if QBCore.Shared.IsFunction(args[1]) then
+        cb = args[1]
+        table.remove(args, 1)
+    end
+
+    QBCore.ClientCallbacks[name] = {
+        callback = cb,
+        promise = promise.new()
+    }
+
+    TriggerClientEvent('QBCore:Client:TriggerClientCallback', source, name, table.unpack(args))
+
+    if cb == nil then
+        Citizen.Await(QBCore.ClientCallbacks[name].promise)
+        return QBCore.ClientCallbacks[name].promise.value
+    end
 end
 
 ---Create Server Callback
@@ -327,23 +463,32 @@ function QBCore.Functions.CreateCallback(name, cb)
     QBCore.ServerCallbacks[name] = cb
 end
 
----Trigger Serv er Callback
----@param name string
----@param source any
----@param cb function
----@param ... any
-function QBCore.Functions.TriggerCallback(name, source, cb, ...)
-    if not QBCore.ServerCallbacks[name] then return end
-    QBCore.ServerCallbacks[name](source, cb, ...)
-end
-
 -- Items
 
 ---Create a usable item
 ---@param item string
 ---@param data function
 function QBCore.Functions.CreateUseableItem(item, data)
-    QBCore.UsableItems[item] = data
+    local rawFunc = nil
+
+    if type(data) == 'table' then
+        if rawget(data, '__cfx_functionReference') then
+            rawFunc = data
+        elseif data.cb and rawget(data.cb, '__cfx_functionReference') then
+            rawFunc = data.cb
+        elseif data.callback and rawget(data.callback, '__cfx_functionReference') then
+            rawFunc = data.callback
+        end
+    elseif type(data) == 'function' then
+        rawFunc = data
+    end
+
+    if rawFunc then
+        QBCore.UsableItems[item] = {
+            func = rawFunc,
+            resource = GetInvokingResource()
+        }
+    end
 end
 
 ---Checks if the given item is usable
@@ -443,9 +588,9 @@ end
 ---@param permission string
 ---@return boolean
 function QBCore.Functions.HasPermission(source, permission)
-    if type(permission) == "string" then
+    if type(permission) == 'string' then
         if IsPlayerAceAllowed(source, permission) then return true end
-    elseif type(permission) == "table" then
+    elseif type(permission) == 'table' then
         for _, permLevel in pairs(permission) do
             if IsPlayerAceAllowed(source, permLevel) then return true end
         end
@@ -460,7 +605,7 @@ end
 function QBCore.Functions.GetPermission(source)
     local src = source
     local perms = {}
-    for _, v in pairs (QBCore.Config.Server.Permissions) do
+    for _, v in pairs(QBCore.Config.Server.Permissions) do
         if IsPlayerAceAllowed(src, v) then
             perms[v] = true
         end
@@ -493,7 +638,7 @@ end
 ---@return boolean, string?
 function QBCore.Functions.IsPlayerBanned(source)
     local plicense = QBCore.Functions.GetIdentifier(source, 'license')
-    local result = MySQL.single.await('SELECT * FROM bans WHERE license = ?', { plicense })
+    local result = MySQL.single.await('SELECT id, reason, expire FROM bans WHERE license = ?', { plicense })
     if not result then return false end
     if os.time() < result.expire then
         local timeTable = os.date('*t', tonumber(result.expire))
@@ -504,20 +649,44 @@ function QBCore.Functions.IsPlayerBanned(source)
     return false
 end
 
+-- Retrieves information about the database connection.
+--- @return table; A table containing the database information.
+function QBCore.Functions.GetDatabaseInfo()
+    local details = {
+        exists = false,
+        database = '',
+    }
+    local connectionString = GetConvar('mysql_connection_string', '')
+
+    if connectionString == '' then
+        return details
+    elseif connectionString:find('mysql://') then
+        connectionString = connectionString:sub(9, -1)
+        details.database = connectionString:sub(connectionString:find('/') + 1, -1):gsub('[%?]+[%w%p]*$', '')
+        details.exists = true
+        return details
+    else
+        connectionString = { string.strsplit(';', connectionString) }
+
+        for i = 1, #connectionString do
+            local v = connectionString[i]
+            if v:match('database') then
+                details.database = v:sub(10, #v)
+                details.exists = true
+                return details
+            end
+        end
+    end
+end
+
 ---Check for duplicate license
 ---@param license any
 ---@return boolean
 function QBCore.Functions.IsLicenseInUse(license)
     local players = GetPlayers()
     for _, player in pairs(players) do
-        local identifiers = GetPlayerIdentifiers(player)
-        for _, id in pairs(identifiers) do
-            if string.find(id, 'license') then
-                if id == license then
-                    return true
-                end
-            end
-        end
+        local playerLicense = QBCore.Functions.GetIdentifier(player, 'license')
+        if playerLicense == license then return true end
     end
     return false
 end
@@ -553,9 +722,18 @@ function QBCore.Functions.PrepForSQL(source, data, pattern)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local result = string.match(data, pattern)
-    if not result or string.len(result) ~= string.len(data)  then
+    if not result or string.len(result) ~= string.len(data) then
         TriggerEvent('qb-log:server:CreateLog', 'anticheat', 'SQL Exploit Attempted', 'red', string.format('%s attempted to exploit SQL!', player.PlayerData.license))
         return false
     end
     return true
 end
+
+for functionName, func in pairs(QBCore.Functions) do
+    if type(func) == 'function' then
+        exports(functionName, func)
+    end
+end
+
+-- Access a specific function directly:
+-- exports['qb-core']:Notify(source, 'Hello Player!')

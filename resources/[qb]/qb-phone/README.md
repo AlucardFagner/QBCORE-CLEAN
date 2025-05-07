@@ -1,113 +1,135 @@
-# qb-phone
-Advanced Phone for QB-Core Framework :iphone:
+# Installation steps
 
-# License
+## General Setup
+General setup is quite easy, delete your OLD qb-phone
+if you server havent been running previously then go ahead and run the provided SQL file in your database.
 
-    QBCore Framework
-    Copyright (C) 2021 Joshua Eger
+If your server has been running qb-phone previously please update your sql while being carefull and take a backup so you have no data lost.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+After the SQL setup you can now drop the resource into your server and start it up while you conduct the next steps.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>
-
-## Dependencies
-- [qb-core](https://github.com/qbcore-framework/qb-core)
-- [qb-policejob](https://github.com/qbcore-framework/qb-policejob) - MEOS, handcuff check etc. 
-- [qb-crypto](https://github.com/qbcore-framework/qb-crypto) - Crypto currency trading 
-- [qb-lapraces](https://github.com/qbcore-framework/qb-lapraces) - Creating routes and racing 
-- [qb-houses](https://github.com/qbcore-framework/qb-houses) - House and Key Management App
-- [qb-garages](https://github.com/qbcore-framework/qb-garages) - For Garage App
-- [qb-banking](https://github.com/qbcore-framework/qb-banking) - For Banking App
-- [screenshot-basic](https://github.com/citizenfx/screenshot-basic) - For Taking Photos
-- A Webhook for hosting photos (Discord or Imgur can provide this)
+## Employment setup
+Setting up employment and multijob can be quite tricky so make sure to reread this if you have any issues...
+If you already have a multijob system and you do not wish to use this then you can skip this step.
 
 
-## Screenshots
-![Home](https://cdn.discordapp.com/attachments/921675245360922625/921675439783673897/home.jpg)
-![Bank](https://cdn.discordapp.com/attachments/921675245360922625/921675441142644756/bank.jpg)
-![Advert](https://cdn.discordapp.com/attachments/921675245360922625/921675440878415872/advert.jpg)
-![Mail](https://cdn.discordapp.com/attachments/921675245360922625/921675440278614068/mail.jpg)
-![Garage](https://cdn.discordapp.com/attachments/921675245360922625/921675439590760528/garage.jpg)
-![Garage Detail](https://cdn.discordapp.com/attachments/921675245360922625/921675441591422986/garage_in.jpg)
-![services](https://cdn.discordapp.com/attachments/921675245360922625/921675458670641152/services.jpg)
-![Houses](https://cdn.discordapp.com/attachments/921675245360922625/921675440005988362/house.jpg)
-![Racing](https://cdn.discordapp.com/attachments/921675245360922625/921675458423173140/race.jpg)
-![Crypto](https://cdn.discordapp.com/attachments/921675245360922625/921675457718517820/qbit.jpg)
-![Gallery](https://cdn.discordapp.com/attachments/921675245360922625/921675441381736448/gallery.jpg)
-![MEOS](https://cdn.discordapp.com/attachments/921675245360922625/921675440488341534/meos.jpg)
-![Twitter](https://cdn.discordapp.com/attachments/921675245360922625/921675459270438922/twitter.jpg)
-![Settings](https://cdn.discordapp.com/attachments/921675245360922625/921675458905513984/setting.jpg)
-![Whatsapp](https://cdn.discordapp.com/attachments/921675245360922625/921675459517906944/whatsapp.jpg)
-![Phone](https://cdn.discordapp.com/attachments/921675245360922625/921675440677064745/phone.jpg)
+1. Head over to qb-phone/server/employment.lua and change local FirstStart from false to true like shown below
 
-## Features
-- Garages app to see your vehicle details
-- Mails to inform the player
-- Banking app to see balance and transfer money
-- Racing app to create races
-- App Store to download apps
-- MEOS app for polices to search
-- Houses app for house details and management
-
-## Installation
-### Manual
-- Download the script and put it in the `[qb]` directory.
-- Import `qb-phone.sql` in your database
-- Add the following code to your server.cfg/resouces.cfg
-```
-ensure qb-core
-ensure screenshot-basic
-ensure qb-phone
-ensure qb-policejob
-ensure qb-crypto
-ensure qb-lapraces
-ensure qb-houses
-ensure qb-garages
-ensure qb-banking
+```lua
+    local FirstStart = true
 ```
 
-## Configuration
+2. Start the script and make sure it's fully done, it can take a while depending on your current playerbase (ensure qb-phone in console or f8)
+
+3. Head over to qb-phone/server/employment.lua again and change the FirstStart to false
+
+Like so:
+```lua
+    local FirstStart = false
 ```
 
-Config = Config or {}
+4. Headover to your qb-core/server/commands.lua and find the follow command 'setjob'
 
-Config.RepeatTimeout = 2000 -- Timeout for unanswered call notification
-Config.CallRepeats = 10 -- Repeats for unanswered call notification
-Config.OpenPhone = 244 -- Key to open phone display
-Config.PhoneApplications = {
-    ["phone"] = { -- Needs to be unique
-        app = "phone", -- App route
-        color = "#04b543", -- App icon color
-        icon = "fa fa-phone-alt", -- App icon
-        tooltipText = "Phone", -- App name
-        tooltipPos = "top",
-        job = false, -- Job requirement
-        blockedjobs = {}, -- Jobs cannot use this app
-        slot = 1, -- App position
-        Alerts = 0, -- Alert count
-    },
-}
+replace the commands with the code below:
+```lua
+QBCore.Commands.Add('setjob', 'Set A Players Job (Admin Only)', { { name = 'id', help = 'Player ID' }, { name = 'job', help = 'Job name' }, { name = 'grade', help = 'Grade' } }, true, function(source, args)
+    local Player = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    if Player then
+        local job = tostring(args[2])
+        local grade = tonumber(args[3])
+        local sgrade = tostring(args[3])
+        local jobInfo = QBCore.Shared.Jobs[job]
+        if jobInfo then
+            if jobInfo["grades"][sgrade] then
+                Player.Functions.SetJob(job, grade)
+                exports['qb-phone']:hireUser(job, Player.PlayerData.citizenid, grade)
+            else
+                TriggerClientEvent('QBCore:Notify', source, "Not a valid grade", 'error')
+            end
+        else
+            TriggerClientEvent('QBCore:Notify', source, "Not a valid job", 'error')
+        end
+    else
+        TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
+    end
+end, 'admin')
 ```
-## Setup Webhook in `server/main.lua` for photos
-Set the following variable to your webhook (For example, a Discord channel or Imgur webhook)
-### To use Discord:
-- Right click on a channel dedicated for photos
-- Click Edit Channel
-- Click Integrations
-- Click View Webhooks
-- Click New Webhook
-- Confirm channel
-- Click Copy Webhook URL
-- Paste into `WebHook` in `server/main.lua`
+
+5. Now below that add the new command called 'removejob' like shown below
+
+```lua
+QBCore.Commands.Add('removejob', 'Removes A Players Job (Admin Only)', { { name = 'id', help = 'Player ID' }, { name = 'job', help = 'Job name' } }, true, function(source, args)
+    local Player = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    if Player then
+        if Player.PlayerData.job.name == tostring(args[2]) then
+            Player.Functions.SetJob("unemployed", 0)
+        end
+        exports['qb-phone']:fireUser(tostring(args[2]), Player.PlayerData.citizenid)
+    else
+        TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
+    end
+end, 'admin')
 ```
-local WebHook = ""
+
+6. If you use qb-cityhall then u have to Find ApplyJob in qb-cityhall/server/main.lua and replace with this one
+
+```lua
+RegisterNetEvent('qb-cityhall:server:ApplyJob', function(job, cityhallCoords)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+    local ped = GetPlayerPed(src)
+    local pedCoords = GetEntityCoords(ped)
+    local JobInfo = QBCore.Shared.Jobs[job]
+    if #(pedCoords - cityhallCoords) >= 20.0 or not availableJobs[job] then
+        return DropPlayer(source, "Attempted exploit abuse")
+    end
+    Player.Functions.SetJob(job, 0)
+    exports['qb-phone']:hireUser(job, Player.PlayerData.citizenid, 0)
+TriggerClientEvent('QBCore:Notify', src, Lang:t('info.new_job', {job = JobInfo.label}))
+end)
 ```
+
+7. Throw the `dialing.ogg` into your interact-sound/client/html/sounds file, if you don't already have it
+
+8. Restart your server fully to get the new commands working and also to get the phone fully working.
+
+
+It should now look like this
+
+![QBCore Commands](https://i.gyazo.com/beb2bd18c02088c184e5e381a9f4962a.png)
+
+
+## Casino Setup
+
+1. Head over to your qb-core/config.lua
+2. Replace the following code with below code
+```lua
+-- Old
+QBConfig.Money.MoneyTypes = { cash = 500, bank = 5000, crypto = 0 } -- type = startamount - Add or remove money types for your server (for ex. blackmoney = 0), remember once added it will not be removed from the database!
+QBConfig.Money.DontAllowMinus = { 'cash', 'crypto' } -- Money that is not allowed going in minus
+```
+```lua
+-- NEW
+QBConfig.Money.MoneyTypes = { cash = 500, bank = 5000, casino = 0 } -- type = startamount - Add or remove money types for your server (for ex. blackmoney = 0), remember once added it will not be removed from the database!
+QBConfig.Money.DontAllowMinus = { 'cash', 'casino' } -- Money that is not allowed going in minus
+```
+
+## Crypto Setup
+
+1. Head over to your qb-core/server/Player.lua
+2. Paste the below code into your metadata if you dont know what is metadata it looks something like this: PlayerData.metadata['inside']
+
+Code to be pasted
+```lua
+    PlayerData.metadata['crypto'] = PlayerData.metadata['crypto'] or {
+        ["shung"] = 0,
+        ["gne"] = 0,
+        ["xcoin"] = 0,
+        ["lme"] = 0
+    }
+```
+
+It should now all look like this:
+
+![Metadata Table](https://i.gyazo.com/5422c6ebd1ede57ab523f2e1e07218c4.png)

@@ -1,59 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap');
+@import "https://assets.nopixel.net/web/fonts/gilroy/stylesheet.css";
 
 .settings-app {
     display: none;
     height: 100%;
     width: 100%;
-    background: rgba(36, 36, 36, 90%);
+    background: linear-gradient(158deg, rgba(24,25,46,1) 0%, rgba(15,18,27,1) 32%, rgba(24,25,46,1) 68%, rgba(15,18,27,1) 100%);
     overflow: hidden;
 }
 
 .settings-app-header {
     position: relative;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
     font-size: 3vh;
     text-align: center;
     top: 70px;
-    color: white;
+    color: #ffffff;
 }
 
 .settings-app-tab-appereance {
     position: absolute;
     top: 15vh;
-    height: 100%;
+    height: 108%;
     width: 100%;
 }
 
 .settings-app-tab-information {
     position: absolute;
     top: 30vh;
-    height: 100%;
+    height: 108%;
     width: 100%;
 }
 
 .settings-app-tab {
     position: relative;
-    width: 90%;
+    width: 88%;
     border-radius: 0.15rem;
     height: 6vh;
     margin-bottom: 10px;
-    color: white;
-    background: rgba(23, 23, 23, 90%);
-    left: 15px;
+    color: #ffffff;
+    background: rgb(25,103,117);
+    background: linear-gradient(101deg, rgba(25,103,117,1) 0%, rgba(26,137,149,0.26094187675070024) 85%);
+    border-radius: 5px;
+    left: 5.5%;
     box-shadow: 0rem 0rem 0.1rem 0.05rem #000000;
 }
 
 .settings-app-tab:hover {
-    background-color: #dc143c;
-    transition: .5s ease;
+    background: rgb(28,136,148);
+    background: radial-gradient(circle, rgba(28,136,148,1) 0%, rgba(8,203,215,1) 100%);
+    border-radius: 5px;
+    transition: .2s ease;
 }
 
 .settings-app-tab-header {
     position: absolute;
     top: -2.5vh;
     height: 2.6vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
     font-size: 1.5vh;
+    
     border-bottom: 1px solid rgba(0, 0, 0, 0.17);
     width: 100%;
 }
@@ -67,6 +72,7 @@
     left: 2vh;
     top: 1.5vh;
     font-size: 2.3vh;
+    
 }
 
 .settings-tab-icon > img {
@@ -83,7 +89,8 @@
     left: 6.2vh;
     top: 1.2vh;
     font-size: 1.3vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
+    
 }
 
 .settings-tab-description {
@@ -91,30 +98,31 @@
     left: 6.2vh;
     top: 3.2vh;
     font-size: 1.2vh;
-    font-family: 'Poppins', sans-serif;
-    color: white;
+    
+    font-family: 'Gilroy';
+    color: #ffffff;
 }
 
 .settings-background-tab {
     display: block;
     position: absolute;
     top: -100%;
-    height: 100%;
+    height: 108%;
     width: 100%;
     left: 0;
     right: 0;
-    background: rgb(36, 36, 36);
+    background: linear-gradient(158deg, rgba(24,25,46,1) 0%, rgba(15,18,27,1) 32%, rgba(24,25,46,1) 68%, rgba(15,18,27,1) 100%);
 }
 
 .settings-profilepicture-tab {
     display: block;
     position: absolute;
     top: -100%;
-    height: 100%;
+    height: 108%;
     width: 100%;
     left: 0;
     right: 0;
-    background: rgb(36, 36, 36);
+    background: linear-gradient(158deg, rgba(24,25,46,1) 0%, rgba(15,18,27,1) 32%, rgba(24,25,46,1) 68%, rgba(15,18,27,1) 100%);
 }
 
 .background-options {
@@ -130,15 +138,16 @@
     border-radius: 0.15rem;
     height: 6vh;
     margin-bottom: 10px;
-    color: white;
-    background: rgba(23, 23, 23, 90%);
+    color: #ffffff;
+    background: rgb(25,103,117);
+    background: linear-gradient(101deg, rgba(25,103,117,1) 0%, rgba(26,137,149,0.26094187675070024) 85%);
     left: 15px;
-    box-shadow: 0rem 0rem 0.1rem 0.05rem #000000;
 }
 
 .background-option:hover {
-    background-color: #dc143c;
-    transition: .5s ease;
+    background: rgb(28,136,148);
+    background: radial-gradient(circle, rgba(28,136,148,1) 0%, rgba(8,203,215,1) 100%);
+    transition: .2s ease;
 }
 
 .background-option-icon {
@@ -148,7 +157,8 @@
     text-align: center;
     line-height: 7vh;
     font-size: 2.3vh;
-    color: #fbc531;
+    
+    color: #ff00c8;
 }
 
 .background-option-title {
@@ -157,9 +167,10 @@
     top: 1.5vh;
     text-align: center;
     font-size: 1vh;
-    color: white;
+    
+    color: #ffffff;
     font-size: 1.3vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
 }
 
 .background-option-description {
@@ -168,9 +179,10 @@
     top: 3.6vh;
     text-align: center;
     font-size: 1vh;
-    color: white;
+    
+    color: #ffffff;
     font-size: 1.1vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
 }
 
 .background-option-current {
@@ -179,13 +191,13 @@
     top: 2.5vh;
     text-align: center;
     font-size: 1.6vh;
-    color: green;
-    font-family: 'Poppins', sans-serif;
+    color: #0095ff;
+    font-family: 'Gilroy';
 }
 
 .background-buttons {
     position: absolute;
-    bottom: 40px;
+    bottom: 10vh;
     height: 5vh;
     width: 100%;
 }
@@ -197,14 +209,14 @@
     width: 50%;
     text-align: center;
     line-height: 4.7vh;
-    color: white;
-    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    font-family: 'Gilroy';
     font-size: 1.5vh;
     transition: .05s;
 }
 
 .background-button:hover {
-    border-top: .3vh solid #dc143c;
+    border-top: .3vh solid #0d1218c0;
 }
 
 .background-custom {
@@ -223,7 +235,7 @@
 }
 
 .background-custom-title {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
     padding: 2vh;
     font-size: 1.5vh;
     text-align: center;
@@ -237,7 +249,7 @@
     outline: none;
     height: 3.5vh;
     width: 21vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
     background: rgb(235, 235, 235);
     border-radius: 2vh;
     text-align: center;
@@ -261,16 +273,16 @@
     width: 50%;
     text-align: center;
     line-height: 4.1vh;
-    color: black;
-    font-family: 'Poppins', sans-serif;
+    color: #000000;
+    font-family: 'Gilroy';
+    
     font-size: 1.5vh;
     transition: .08s;
     border-bottom: 2px solid #e8421800;
 }
 
 .custom-background-button:hover {
-    font-weight: bolder;
-    color: #DC143C;
+    color: #0d1218c0;
 }
 
 
@@ -287,10 +299,16 @@
     border-radius: 0.15rem;
     height: 6vh;
     margin-bottom: 10px;
-    color: white;
-    background: rgba(23, 23, 23, 90%);
+    color: #ffffff;
+    background: rgb(25,103,117);
+    background: linear-gradient(101deg, rgba(25,103,117,1) 0%, rgba(26,137,149,0.26094187675070024) 85%);
     left: 15px;
-    box-shadow: 0rem 0rem 0.1rem 0.05rem #000000;
+}
+
+.profilepicture-option:hover {
+    background: rgb(28,136,148);
+    background: radial-gradient(circle, rgba(28,136,148,1) 0%, rgba(8,203,215,1) 100%);
+    transition: .2s ease;
 }
 
 .profilepicture-option-icon {
@@ -300,6 +318,7 @@
     text-align: center;
     line-height: 7vh;
     font-size: 2.3vh;
+    
     color: #fbc531;
 }
 
@@ -309,9 +328,10 @@
     top: 1.5vh;
     text-align: center;
     font-size: 1vh;
-    color: white;
+    
+    color: #ffffff;
     font-size: 1.3vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
 }
 
 .profilepicture-option-description {
@@ -320,9 +340,10 @@
     top: 3.6vh;
     text-align: center;
     font-size: 1vh;
-    color: white;
+    
+    color: #ffffff;
     font-size: 1.1vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
 }
 
 .profilepicture-option-current {
@@ -331,13 +352,14 @@
     top: 2.5vh;
     text-align: center;
     font-size: 1.6vh;
-    color: green;
-    font-family: 'Poppins', sans-serif;
+    
+    color: #0095ff;
+    font-family: 'Gilroy';
 }
 
 .profilepicture-buttons {
     position: absolute;
-    bottom: 40px;
+    bottom: 10vh;
     height: 5vh;
     width: 100%;
 }
@@ -349,13 +371,14 @@
     width: 50%;
     text-align: center;
     line-height: 4.7vh;
-    color: white;
-    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    font-family: 'Gilroy';
+    
     font-size: 1.5vh;
 }
 
 .profilepicture-button:hover {
-    border-top: .3vh solid #dc143c;
+    border-top: .3vh solid #0d1218c0;
 }
 
 .profilepicture-custom {
@@ -374,8 +397,9 @@
 }
 
 .profilepicture-custom-title {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
     padding: 2vh;
+    
     font-size: 1.5vh;
     text-align: center;
 }
@@ -387,7 +411,8 @@
     outline: none;
     height: 3.5vh;
     width: 21vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Gilroy';
+    
     border-radius: 2vh;
     text-align: center;
 }
@@ -410,8 +435,9 @@
     width: 50%;
     text-align: center;
     line-height: 4.1vh;
-    color: black;
-    font-family: 'Poppins', sans-serif;
+    color: #000000;
+    font-family: 'Gilroy';
+    
     font-size: 1.5vh;
     transition: .08s;
     border-bottom: 2px solid #e8421800;
@@ -419,13 +445,11 @@
 
 .custom-profilepicture-button:hover {
     font-weight: bolder;
-    color: #DC143C;
+    color: #0d1218c0;
 }
 
-/* The switch - the box around the slider */
 .switch {
     position: absolute;
-    /* display: inline-block; */
     width: 50px;
     height: 24px;
     top: 50%;
@@ -433,14 +457,12 @@
     transform: translateY(-50%);
 }
 
-/* Hide default HTML checkbox */
 .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-/* The slider */
 .slider {
     position: absolute;
     cursor: pointer;
@@ -460,7 +482,7 @@
     width: 16px;
     left: 4px;
     bottom: 4px;
-    background-color: white;
+    background-color: #ffffff;
     -webkit-transition: .4s;
     transition: .4s;
 }
@@ -479,7 +501,6 @@ input:checked + .slider:before {
     transform: translateX(26px);
 }
 
-/* Rounded sliders */
 .slider.round {
     border-radius: 24px;
 }

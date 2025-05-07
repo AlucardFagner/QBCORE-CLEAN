@@ -4,10 +4,46 @@ QBCore.Shared = QBShared
 QBCore.ClientCallbacks = {}
 QBCore.ServerCallbacks = {}
 
-exports('GetCoreObject', function()
-    return QBCore
-end)
+-- Get the full QBCore object (default behavior):
+-- local QBCore = GetCoreObject()
 
--- - usar esta exportação em um script em vez de manifesto método
--- - Basta colocar esta linha de código abaixo no topo do script
--- -qbcore local = exportações ['qb-core']: getCoreObject ()
+-- Get only specific parts of QBCore:
+-- local QBCore = GetCoreObject({'Players', 'Config'})
+
+local function GetCoreObject(filters)
+    if not filters then return QBCore end
+    local results = {}
+    for i = 1, #filters do
+        local key = filters[i]
+        if QBCore[key] then
+            results[key] = QBCore[key]
+        end
+    end
+    return results
+end
+exports('GetCoreObject', GetCoreObject)
+
+local function GetSharedItems()
+    return QBShared.Items
+end
+exports('GetSharedItems', GetSharedItems)
+
+local function GetSharedVehicles()
+    return QBShared.Vehicles
+end
+exports('GetSharedVehicles', GetSharedVehicles)
+
+local function GetSharedWeapons()
+    return QBShared.Weapons
+end
+exports('GetSharedWeapons', GetSharedWeapons)
+
+local function GetSharedJobs()
+    return QBShared.Jobs
+end
+exports('GetSharedJobs', GetSharedJobs)
+
+local function GetSharedGangs()
+    return QBShared.Gangs
+end
+exports('GetSharedGangs', GetSharedGangs)

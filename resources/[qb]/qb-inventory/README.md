@@ -1,42 +1,55 @@
-# qb-inventory with decay system CSS Rework
+# qb-inventory
 
-# Dependencies
-* [QBCore Framework](https://github.com/qbcore-framework)
-* [qb-target](https://github.com/BerkieBb/qb-target)
-* [qb-core](https://github.com/qbcore-framework/qb-core)
+## Dependencies
+- [qb-core](https://github.com/qbcore-framework/qb-core)
+- [qb-smallresources](https://github.com/qbcore-framework/qb-smallresources) - For logging transfer and other history
 
-# How to install
-* Download source files from github
-* Drag source files into your resources folder
-* Rename folder to `qb-inventory`
+## Features
+- Stashes (Personal and/or Shared)
+- Vehicle Trunk & Glovebox
+- Weapon Attachments
+- Shops
+- Item Drops
 
-# TO DO
-you need to add a decay and created value in your qb-core/shared/items for all items, the decay is set to be the days the item lasts
-<br>
+## Documentation
+https://docs.qbcore.org/qbcore-documentation/qbcore-resources/qb-inventory
 
-```lua
--- created = this will get filled in with the time when it's created, just leave this
--- decay = amount of days that an item will decay
--- delete = choice whether to remove the item when it's decayed or not
-["created"] = nil, ["decay"] = 28.0, ["delete"] = true
+## Installation
+### Manual
+- Download the script and put it in the `[qb]` directory.
+- Import `qb-inventory.sql` in your database
+- Add the following code to your server.cfg/resouces.cfg
+
+# Migrating from old qb-inventory
+
+## Database
+### Upload the new `inventory.sql` file to create the new `inventories` table
+### Use the provided `migrate.sql` file to migrate all of your saved inventory data from stashes, trunks, etc
+### Once complete, you can delete `gloveboxitems` `stashitems` and `trunkitems` tables from your database
+```sql
+CREATE TABLE IF NOT EXISTS `inventories` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `identifier` VARCHAR(50) NOT NULL,
+  `items` LONGTEXT DEFAULT ('[]'),
+  PRIMARY KEY (`identifier`),
+  KEY `id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 ```
-<br>
-Example:
-<br>
 
-```lua
-['sandwich'] = {['name'] = 'sandwich', ['label'] = 'Sandwich', ['weight'] = 200, ['type'] = 'item', ['image'] = 'sandwich.png', ['unique'] = false, ['useable'] = true, ['shouldClose'] = true,	['combinable'] = nil, ['description'] = 'Nice bread for your stomach', ["created"] = nil, ["decay"] = 3.0, ["delete"] = true},
-```
-In this example our sandwich will decay in 3 days and removed when used.
-<br>
+# License
 
-# Previews
-![full inventory](https://cdn.discordapp.com/attachments/1003822642379374703/1072838189796036649/inv.png)
+    QBCore Framework
+    Copyright (C) 2021 Joshua Eger
 
-<br>
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-# Credits
-* [qb-inventory-decay](https://github.com/i-kulgu/qb-inventory-decay)
-* [lj-inventory](https://github.com/loljoshie/lj-inventory) 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-<br>
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>

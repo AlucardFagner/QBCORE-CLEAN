@@ -6,10 +6,10 @@ local Translations = {
         dead = "You are dead LOL.",
         too_far_away = "You are too far away lmfao.",
         not_enough = "You don\'t have this amount.",
-        invalid_amount = "Invalid Amount Given"
+        invalid_amount = "Valor inválido fornecido"
     },
     success = {
-        debit_card = "You have successfully ordered a Debit Card.",
+        debit_card = "Você pediu com sucesso um cartão de débito.",
         cash_deposit = "You successfully made a cash deposit of $%{value}.",
         cash_withdrawal = "You successfully made a cash withdrawal of $%{value}.",
         updated_pin = "You have successfully updated your debit card pin.",

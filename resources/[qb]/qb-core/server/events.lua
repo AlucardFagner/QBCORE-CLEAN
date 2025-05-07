@@ -11,94 +11,84 @@ AddEventHandler('playerDropped', function(reason)
     local src = source
     if not QBCore.Players[src] then return end
     local Player = QBCore.Players[src]
-    TriggerEvent('qb-log:server:CreateLog', 'joinleave', 'Dropped', 'red', '**' .. GetPlayerName(src) .. '** (' .. Player.PlayerData.license .. ') left..' ..'\n **Reason:** ' .. reason)
+    TriggerEvent('qb-log:server:CreateLog', 'joinleave', 'Dropped', 'red', '**' .. GetPlayerName(src) .. '** (' .. Player.PlayerData.license .. ') left..' .. '\n **Reason:** ' .. reason)
+    TriggerEvent('QBCore:Server:PlayerDropped', Player)
     Player.Functions.Save()
     QBCore.Player_Buckets[Player.PlayerData.license] = nil
     QBCore.Players[src] = nil
 end)
 
+AddEventHandler("onResourceStop", function(resName)
+    for i,v in pairs(QBCore.UsableItems) do
+        if v.resource == resName then
+            QBCore.UsableItems[i] = nil
+        end
+    end
+end)
+
 -- Player Connecting
+local readyFunction = MySQL.ready
+local databaseConnected, bansTableExists = readyFunction == nil, readyFunction == nil
+if readyFunction ~= nil then
+    MySQL.ready(function()
+        databaseConnected = true
+
+        local DatabaseInfo = QBCore.Functions.GetDatabaseInfo()
+        if not DatabaseInfo or not DatabaseInfo.exists then return end
+
+        local result = MySQL.query.await('SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = "bans";', {DatabaseInfo.database})
+        if result and result[1] then
+            bansTableExists = true
+        end
+    end)
+end
 
 local function onPlayerConnecting(name, _, deferrals)
     local src = source
-    local license
-    local identifiers = GetPlayerIdentifiers(src)
     deferrals.defer()
 
-    -- Mandatory wait
+    if QBCore.Config.Server.Closed and not IsPlayerAceAllowed(src, 'qbadmin.join') then
+        return deferrals.done(QBCore.Config.Server.ClosedReason)
+    end
+
+    if not databaseConnected then
+        return deferrals.done(Lang:t('error.connecting_database_error'))
+    end
+
+    if QBCore.Config.Server.Whitelist then
+        Wait(0)
+        deferrals.update(string.format(Lang:t('info.checking_whitelisted'), name))
+        if not QBCore.Functions.IsWhitelisted(src) then
+            return deferrals.done(Lang:t('error.not_whitelisted'))
+        end
+    end
+
     Wait(0)
-
-    if QBCore.Config.Server.Closed then
-        if not IsPlayerAceAllowed(src, 'qbadmin.join') then
-            deferrals.done(QBCore.Config.Server.ClosedReason)
-        end
-    end
-
-    for _, v in pairs(identifiers) do
-        if string.find(v, 'license') then
-            license = v
-            break
-        end
-    end
-
-    if GetConvarInt("sv_fxdkMode", false) then
-        license = 'license:AAAAAAAAAAAAAAAA' -- Dummy License
-    end
+    deferrals.update(string.format('Hello %s. Your license is being checked', name))
+    local license = QBCore.Functions.GetIdentifier(src, 'license')
 
     if not license then
-        deferrals.done(Lang:t('error.no_valid_license'))
+        return deferrals.done(Lang:t('error.no_valid_license'))
     elseif QBCore.Config.Server.CheckDuplicateLicense and QBCore.Functions.IsLicenseInUse(license) then
-        deferrals.done(Lang:t('error.duplicate_license'))
+        return deferrals.done(Lang:t('error.duplicate_license'))
     end
 
-    local databaseTime = os.clock()
-    local databasePromise = promise.new()
+    Wait(0)
+    deferrals.update(string.format(Lang:t('info.checking_ban'), name))
 
-    -- conduct database-dependant checks
-    CreateThread(function()
-        deferrals.update(string.format(Lang:t('info.checking_ban'), name))
-        local databaseSuccess, databaseError = pcall(function()
-            local isBanned, Reason = QBCore.Functions.IsPlayerBanned(src)
-            if isBanned then
-                deferrals.done(Reason)
-            end
-        end)
-
-        if QBCore.Config.Server.Whitelist then
-            deferrals.update(string.format(Lang:t('info.checking_whitelisted'), name))
-            databaseSuccess, databaseError = pcall(function()
-                if not QBCore.Functions.IsWhitelisted(src) then
-                    deferrals.done(Lang:t('error.not_whitelisted'))
-                end
-            end)
-        end
-
-        if not databaseSuccess then
-            databasePromise:reject(databaseError)
-        end
-        databasePromise:resolve()
-    end)
-
-    -- wait for database to finish
-    databasePromise:next(function()
-        deferrals.update(string.format(Lang:t('info.join_server'), name))
-        deferrals.done()
-    end, function (databaseError)
-        deferrals.done(Lang:t('error.connecting_database_error'))
-        print('^1' .. databaseError)
-    end)
-
-    -- if conducting checks for too long then raise error
-    while databasePromise.state == 0 do
-        if os.clock() - databaseTime > 30 then
-            deferrals.done(Lang:t('error.connecting_database_timeout'))
-            error(Lang:t('error.connecting_database_timeout'))
-            break
-        end
-        Wait(1000)
+    if not bansTableExists then
+        return deferrals.done(Lang:t('error.ban_table_not_found'))
     end
 
-    -- Add any additional defferals you may need!
+    local success, isBanned, reason = pcall(QBCore.Functions.IsPlayerBanned, src)
+    if not success then return deferrals.done(Lang:t('error.connecting_database_error')) end
+    if isBanned then return deferrals.done(reason) end
+
+    Wait(0)
+    deferrals.update(string.format(Lang:t('info.join_server'), name))
+    deferrals.done()
+
+    TriggerClientEvent('QBCore:Client:SharedUpdate', src, QBCore.Shared)
 end
 
 AddEventHandler('playerConnecting', onPlayerConnecting)
@@ -117,7 +107,7 @@ RegisterNetEvent('QBCore:Server:CloseServer', function(reason)
             end
         end
     else
-        QBCore.Functions.Kick(src, Lang:t("error.no_permission"), nil, nil)
+        QBCore.Functions.Kick(src, Lang:t('error.no_permission'), nil, nil)
     end
 end)
 
@@ -126,7 +116,7 @@ RegisterNetEvent('QBCore:Server:OpenServer', function()
     if QBCore.Functions.HasPermission(src, 'admin') then
         QBCore.Config.Server.Closed = false
     else
-        QBCore.Functions.Kick(src, Lang:t("error.no_permission"), nil, nil)
+        QBCore.Functions.Kick(src, Lang:t('error.no_permission'), nil, nil)
     end
 end)
 
@@ -135,15 +125,23 @@ end)
 -- Client Callback
 RegisterNetEvent('QBCore:Server:TriggerClientCallback', function(name, ...)
     if QBCore.ClientCallbacks[name] then
-        QBCore.ClientCallbacks[name](...)
+        QBCore.ClientCallbacks[name].promise:resolve(...)
+
+        if QBCore.ClientCallbacks[name].callback then
+            QBCore.ClientCallbacks[name].callback(...)
+        end
+
         QBCore.ClientCallbacks[name] = nil
     end
 end)
 
 -- Server Callback
 RegisterNetEvent('QBCore:Server:TriggerCallback', function(name, ...)
+    if not QBCore.ServerCallbacks[name] then return end
+
     local src = source
-    QBCore.Functions.TriggerCallback(name, src, function(...)
+
+    QBCore.ServerCallbacks[name](src, function(...)
         TriggerClientEvent('QBCore:Client:TriggerCallback', src, name, ...)
     end, ...)
 end)
@@ -179,7 +177,7 @@ RegisterNetEvent('QBCore:ToggleDuty', function()
         Player.Functions.SetJobDuty(true)
         TriggerClientEvent('QBCore:Notify', src, Lang:t('info.on_duty'))
     end
-        
+
     TriggerEvent('QBCore:Server:SetDuty', src, Player.PlayerData.job.onduty)
     TriggerClientEvent('QBCore:Client:SetDuty', src, Player.PlayerData.job.onduty)
 end)
@@ -187,7 +185,7 @@ end)
 -- BaseEvents
 
 -- Vehicles
-RegisterServerEvent('baseevents:enteringVehicle', function(veh,seat,modelName)
+RegisterServerEvent('baseevents:enteringVehicle', function(veh, seat, modelName)
     local src = source
     local data = {
         vehicle = veh,
@@ -198,7 +196,7 @@ RegisterServerEvent('baseevents:enteringVehicle', function(veh,seat,modelName)
     TriggerClientEvent('QBCore:Client:VehicleInfo', src, data)
 end)
 
-RegisterServerEvent('baseevents:enteredVehicle', function(veh,seat,modelName)
+RegisterServerEvent('baseevents:enteredVehicle', function(veh, seat, modelName)
     local src = source
     local data = {
         vehicle = veh,
@@ -214,7 +212,7 @@ RegisterServerEvent('baseevents:enteringAborted', function()
     TriggerClientEvent('QBCore:Client:AbortVehicleEntering', src)
 end)
 
-RegisterServerEvent('baseevents:leftVehicle', function(veh,seat,modelName)
+RegisterServerEvent('baseevents:leftVehicle', function(veh, seat, modelName)
     local src = source
     local data = {
         vehicle = veh,
@@ -229,20 +227,20 @@ end)
 
 -- This event is exploitable and should not be used. It has been deprecated, and will be removed soon.
 RegisterNetEvent('QBCore:Server:UseItem', function(item)
-    print(string.format("%s triggered QBCore:Server:UseItem by ID %s with the following data. This event is deprecated due to exploitation, and will be removed soon. Check qb-inventory for the right use on this event.", GetInvokingResource(), source))
+    print(string.format('%s triggered QBCore:Server:UseItem by ID %s with the following data. This event is deprecated due to exploitation, and will be removed soon. Check qb-inventory for the right use on this event.', GetInvokingResource(), source))
     QBCore.Debug(item)
 end)
 
 -- This event is exploitable and should not be used. It has been deprecated, and will be removed soon. function(itemName, amount, slot)
 RegisterNetEvent('QBCore:Server:RemoveItem', function(itemName, amount)
     local src = source
-    print(string.format("%s triggered QBCore:Server:RemoveItem by ID %s for %s %s. This event is deprecated due to exploitation, and will be removed soon. Adjust your events accordingly to do this server side with player functions.", GetInvokingResource(), src, amount, itemName))
+    print(string.format('%s triggered QBCore:Server:RemoveItem by ID %s for %s %s. This event is deprecated due to exploitation, and will be removed soon. Adjust your events accordingly to do this server side with player functions.', GetInvokingResource(), src, amount, itemName))
 end)
 
 -- This event is exploitable and should not be used. It has been deprecated, and will be removed soon. function(itemName, amount, slot, info)
 RegisterNetEvent('QBCore:Server:AddItem', function(itemName, amount)
     local src = source
-    print(string.format("%s triggered QBCore:Server:AddItem by ID %s for %s %s. This event is deprecated due to exploitation, and will be removed soon. Adjust your events accordingly to do this server side with player functions.", GetInvokingResource(), src, amount, itemName))
+    print(string.format('%s triggered QBCore:Server:AddItem by ID %s for %s %s. This event is deprecated due to exploitation, and will be removed soon. Adjust your events accordingly to do this server side with player functions.', GetInvokingResource(), src, amount, itemName))
 end)
 
 -- Non-Chat Command Calling (ex: qb-adminmenu)
@@ -252,7 +250,7 @@ RegisterNetEvent('QBCore:CallCommand', function(command, args)
     if not QBCore.Commands.List[command] then return end
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
-    local hasPerm = QBCore.Functions.HasPermission(src, "command."..QBCore.Commands.List[command].name)
+    local hasPerm = QBCore.Functions.HasPermission(src, 'command.' .. QBCore.Commands.List[command].name)
     if hasPerm then
         if QBCore.Commands.List[command].argsrequired and #QBCore.Commands.List[command].arguments ~= 0 and not args[#QBCore.Commands.List[command].arguments] then
             TriggerClientEvent('QBCore:Notify', src, Lang:t('error.missing_args2'), 'error')
@@ -285,29 +283,3 @@ end)
 --QBCore.Functions.CreateCallback('QBCore:HasItem', function(source, cb, items, amount)
 -- https://github.com/qbcore-framework/qb-inventory/blob/e4ef156d93dd1727234d388c3f25110c350b3bcf/server/main.lua#L2066
 --end)
-
------------------------------------------------------------------------------------------------------------------------------------------
--- DISCORDLINKS
------------------------------------------------------------------------------------------------------------------------------------------
-local discordLinks = {
-	["Giveitem"] = "https://discord.com/api/webhooks/1189286092831199263/bYUVPY_SSDXgK-Mmly1pkfmnEOW6-i4Yj_Tpio2Mes9GW3mGljW6AGcQ8xPw1R4_0Gv4",
-
-
-}
------------------------------------------------------------------------------------------------------------------------------------------
--- DISCORDLOGS
------------------------------------------------------------------------------------------------------------------------------------------
-RegisterNetEvent("discordLogs")
-AddEventHandler("discordLogs",function(webhook,message,color)
-	PerformHttpRequest(discordLinks[webhook],function(err,text,headers) 
-    end,"POST",json.encode({
-		username = "New Wave Free",
-
-		embeds = {
-        { 
-            color = color, 
-            description = message 
-        } 
-    }
-	}),{ ["Content-Type"] = "application/json" })
-end)

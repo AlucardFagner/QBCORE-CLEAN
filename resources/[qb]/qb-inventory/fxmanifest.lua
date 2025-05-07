@@ -1,44 +1,37 @@
--- This Package Leaked By TC HUB.
--- For More Leaks Join Our Discord Server: https://discord.gg/4KFYgmrYaG / https://discord.gg/4KFYgmrYaG
--- LEAKED BY TC HUB
-
 fx_version 'cerulean'
 game 'gta5'
-
-description 'MRF-Inventory'
-version '1.1.0'
+lua54 'yes'
+author 'Kakarot'
+description 'Player inventory system providing a variety of features for storing and managing items'
+version '2.0.0'
 
 shared_scripts {
     '@qb-core/shared/locale.lua',
     'locales/en.lua',
     'locales/*.lua',
-    'config.lua',
-    '@qb-weapons/config.lua'
+    'config/*.lua',
+}
+
+client_scripts {
+    'client/main.lua',
+    'client/drops.lua',
+    'client/vehicles.lua',
 }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/main.lua',
+    'server/functions.lua',
+    'server/commands.lua',
 }
-client_script 'client/main.lua'
 
-ui_page {
-    'html/ui.html'
-}
+ui_page 'html/index.html'
 
 files {
-    'html/ui.html',
-    'html/css/main.css',
-    'html/js/app.js',
+    'html/index.html',
+    'html/main.css',
+    'html/app.js',
     'html/images/*.png',
-    'html/images/*.jpg',
-    'html/ammo_images/*.png',
-    'html/attachment_images/*.png',
-    'html/*.ttf'
 }
 
-lua54 'yes'
-
--- This Package Leaked By TC HUB.
--- For More Leaks Join Our Discord Server: https://discord.gg/4KFYgmrYaG / https://discord.gg/4KFYgmrYaG
--- LEAKED BY TC HUB
+dependency 'qb-weapons'

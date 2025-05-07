@@ -1,8 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
-
-description 'QB-Garages'
-version '1.2.1'
+lua54 'yes'
+author 'Kakarot'
+description 'Allows players to store their vehicles in garages and withdraw job vehicles'
+version '2.0.0'
 
 shared_scripts {
     'config.lua',
@@ -13,7 +14,7 @@ shared_scripts {
 
 client_scripts {
     '@PolyZone/client.lua',
-    '@PolyZone/BoxZone.lua',
+    '@PolyZone/CircleZone.lua',
     '@PolyZone/ComboZone.lua',
     'client/main.lua',
 }
@@ -23,4 +24,11 @@ server_scripts {
     'server/main.lua'
 }
 
-lua54 'yes'
+ui_page 'html/index.html'
+
+files {
+    'html/index.html',
+    'html/script.js',
+    'html/style.css',
+    'html/logo.png',
+}
