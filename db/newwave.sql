@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : alucard
+ Source Server         : newwave
  Source Server Type    : MySQL
  Source Server Version : 100432
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 100432
  File Encoding         : 65001
 
- Date: 07/05/2025 12:05:10
+ Date: 27/08/2025 18:29:24
 */
 
 SET NAMES utf8mb4;
@@ -205,7 +205,7 @@ CREATE TABLE `inventories`  (
   `items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
   PRIMARY KEY (`identifier`) USING BTREE,
   INDEX `id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for lapraces
@@ -519,7 +519,7 @@ CREATE TABLE `players`  (
   INDEX `id`(`id` ASC) USING BTREE,
   INDEX `last_updated`(`last_updated` ASC) USING BTREE,
   INDEX `license`(`license` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for playerskins

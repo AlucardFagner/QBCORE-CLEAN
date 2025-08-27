@@ -16,7 +16,7 @@ Config.BillingCommissions = { -- This is a percentage (0.10) == 10%
 Config.Webhook = 'https://discord.com/api/webhooks/1268595812716384276/ik3aCpDFaczRKRRwgJKRVtsmlXg41MzpvZMLaRCnL42JkasU3lv0aZcZPFy_yI2Lqp0O'
 
 -- Nome do item para o aplicativo Pings (ter uma VPN envia um ping anônimo, senão envia o nome do jogador)
-Config.VPNItem = 'vpn'
+Config.VPNItem = false
 
 -- A garagem em que o veículo vai para quando você vende um carro para um jogador
 Config.SellGarage = 'casinogarage'

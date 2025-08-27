@@ -387,4 +387,6 @@ QBShared.Items = {
     item_bench = {name = "item_bench", label = "Workbench", weight = 15000, type = "item", image = "workbench.png", unique = true, useable = true, shouldClose = false, combinable = nil, description = "A workbench to craft items."},
     attachment_bench = {name = "attachment_bench", label = "Attachment Workbench", weight = 15000, type = "item", image = "attworkbench.png", unique = true, useable = true, shouldClose = false, combinable = nil, description = "A workbench for crafting attachments."},
 
+    vpn = {name = 'vpn', label = 'VPN', weight = 100, type = 'item', image = 'vpn.png', unique = true, useable = false, shouldClose = true, description = 'Uma VPN descartável para acesso anônimo.'},
+
 }

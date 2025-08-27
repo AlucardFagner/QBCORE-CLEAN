@@ -245,7 +245,9 @@ local function OpenPhone()
         PhoneData.PlayerData = PlayerData
         SetNuiFocus(true, true)
 
-        local hasVPN = QBCore.Functions.HasItem(Config.VPNItem)
+        -- local hasVPN = QBCore.Functions.HasItem(Config.VPNItem)
+        local hasVPN = Config.VPNItem and QBCore.Functions.HasItem(Config.VPNItem) or false
+
 
         SendNUIMessage({
             action = "open",
